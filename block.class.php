@@ -4,7 +4,7 @@ class Block{
     private $Request;
 
     function __construct(Request $Request){
-        $this->db = Db::getInstance()->getConnection();
+        //$this->db = Db::getInstance()->getConnection();
         $this->Request = $Request;
     }
 

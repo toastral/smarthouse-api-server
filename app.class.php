@@ -5,13 +5,14 @@ class App{
     public  $a_res;
 
     function __construct(Request $Request){
-        $this->db = Db::getInstance()->getConnection();
+        //$this->db = Db::getInstance()->getConnection();
+        $this->db = new DB();
         $this->Request = $Request;
     }
 
     function processAuth(){
         $q="SELECT value FROM config WHERE name='SECRET'";
-        $res = $this->db->query($q);
+        $res = $this->db->qry($q);
         $row = $res->fetch_assoc();
         if(sh1($row['SECRET']) == $this->Request->auth_hash){
            // удалить ip из таблицы block
@@ -23,18 +24,23 @@ class App{
             // сгенерировать ошибку - access denied
         }
     }
+
     function processPut(){
         $a_addr_for_put = array_keys($this->Request->a_addr_values);
-        $q ='SELECT id, addr, value FROM current_data WHERE addr IN('.implode(',', $a_addr_for_put).'AND device_id='.$this->Request->device_id;
-        $res = $this->db->query($q);
+        $q ='SELECT id, addr, value FROM current_data WHERE addr IN('.implode(',', $a_addr_for_put).') AND device_id='.$this->Request->device_id;
+        $res = $this->db->qry($q);
         $a_data_in_db = array();
         $a_addr_for_update = array();
-        while($row = $res->fetch_assoc()){
-            $a_data_in_db[$row['addr']]=$row;
-            $a_addr_for_update[] = $row['addr'];
+
+        if($res->num_rows){
+            while($row = $res->fetch_assoc()){
+                $a_data_in_db[$row['addr']]=$row;
+                $a_addr_for_update[] = $row['addr'];
+            }
         }
         $a_addr_for_insert = array_diff($a_addr_for_put, $a_addr_for_update);
 
+print_r($a_addr_for_insert);
         if(count($a_addr_for_insert)){
             $q = "INSERT INTO current_data (device_id, addr, value, created) VALUES ";
             $a_q = array();
@@ -43,7 +49,7 @@ class App{
                 $a_q[] = sprintf('( %d, %d, %d, %d)', $this->Request->device_id, $addr, $value, time());
             }
             $q = $q.implode(',', $a_q);
-            $this->db->query($q);
+            $this->db->qry($q);
         }
 
         if(count($a_addr_for_update)){
@@ -51,7 +57,7 @@ class App{
             foreach($a_addr_for_update as $addr){
                 $value = $this->Request->a_addr_values[$addr];
                 $qq = sprintf($q, $this->Request->device_id, $addr, $value, time(), $a_data_in_db[$addr]['id']);
-                $this->db->query($qq);
+                $this->db->qry($qq);
             }
         }
 
@@ -64,7 +70,7 @@ class App{
             $a_q[] = sprintf("( %d, %d, %d, '%s', %d)", $this->Request->device_id, $addr, $value, $this->Request->comment, time());
         }
         $q = $q.implode(',', $a_q);
-        $this->db->query($q);
+        $this->db->qry($q);
 
         // "подогрев" кэша
     }
@@ -73,7 +79,7 @@ class App{
         // формируем массив адресов, которых нет в кэше
 
         $q = 'SELECT addr, value FROM current_data WHERE addr IN('.implode(',', $this->Request->a_addr).') AND device_id='.$this->Request->device_id;
-        $res = $this->db->query($q);
+        $res = $this->db->qry($q);
         while($row = $res->fetch_assoc()){
             $this->a_res[$row['addr']]=$row['value'];
         }
@@ -84,7 +90,7 @@ class App{
         $q = 'SELECT value, comment, created FROM log WHERE device_id='.$this->Request->device_id.' AND addr='.$this->Request->logaddr;
         $q.=' LIMIT '.$this->Request->loglimit;
         if($this->Request->logoffset) $q.=' OFFSET '.$this->Request->logoffset;
-        $res = $this->db->query($q);
+        $res = $this->db->qry($q);
         while($row = $res->fetch_assoc()){
             $this->a_res[$row['addr']]=$row;
         }
