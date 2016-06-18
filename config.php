@@ -1,6 +1,6 @@
 <?php
-$db_host  = "localhost:3309";
-$db_user  = "root";
-$db_pass  = "mysqlroot";
-$db_name  = "smarthouse";
+define('DB_HOST',"localhost:3306");
+define('DB_USER',"root");
+define('DB_PASS',"mysqlroot");
+define('DB_NAME',"smart");
 ?>

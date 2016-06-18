@@ -1,4 +1,3 @@
 AddDefaultCharset utf-8
 RewriteEngine on
-#RewriteRule ^(get|post)/(.*?)? index.php?cmd=$1&path=$2 [L]
-RewriteRule ^(get|post|auth)(.*?)$ index.php?cmd=$1&path=$2 [L]
+RewriteRule ^(get|put|log|auth)(.*?)$ index.php?cmd=$1&path=$2 [L]
