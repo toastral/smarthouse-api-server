@@ -1,11 +1,9 @@
 <?php
 class Answer{
-    private $Request;
+    function __construct(){}
 
-    function __construct(Request $Request){
-        $this->Request = $Request;
+    function show($arr){
+        echo json_encode($arr);
     }
-
-    function show(){}
 }
 ?>
