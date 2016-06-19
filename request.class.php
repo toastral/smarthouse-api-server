@@ -6,6 +6,7 @@ class Request{
     const REQUEST_PARSE_ADDR_VALUES_ERROR = 1004;
     const REQUEST_PARSE_SESSION_ID_ERROR = 1005;
     const REQUEST_PARSE_AUTH_CODE_ERROR = 1006;
+    const REQUEST_PARSE_LOG_DATA_ERROR = 1007;
 
     public $path;
 
@@ -45,20 +46,16 @@ class Request{
                 break;
         }
     }
-
     function parseAuth(){
         $this->parseDevId();
         $this->parseAuthCode();
     }
-
     function parseGet(){
         $this->parseDevId();
         $this->parseAnsType();
         $this->parseRegAddrs();
         $this->parseSessionId();
-
     }
-
     function parsePut(){
         $this->parseDevId();
         $this->parseAnsType();
@@ -66,12 +63,21 @@ class Request{
         $this->parseSessionId();
         $this->parseComment();
     }
-
+    function parseLog(){
+        $this->parseDevId();
+        $this->parseLogInfo();
+        $this->parseSessionId();
+    }
+    function parseLogInfo(){
+        if(!preg_match("!/([\w]+)/([\w]+)/([\w]+)!", $this->path, $patt)) throw new MyException("Not found log data", self::REQUEST_PARSE_LOG_DATA_ERROR);
+        $this->log_addr     = base_convert($patt[1], 16, 10);
+        $this->log_limit    = intval($patt[2]);
+        $this->log_offset   = intval($patt[3]);
+    }
     function parseAuthCode(){
         if(!preg_match("!/([^/]+)$!", $this->path, $patt)) throw new MyException("Not found auth code", self::REQUEST_PARSE_AUTH_CODE_ERROR);
         $this->auth_code = $patt[1];
     }
-
     function parseDevId(){
         if(!preg_match("!/(i-([\w]{4}))!", $this->path, $patt)) throw new MyException("Not found device id", self::REQUEST_PARSE_DEVICE_ID_ERROR);
         $this->dev_id = base_convert($patt[2], 16, 10);

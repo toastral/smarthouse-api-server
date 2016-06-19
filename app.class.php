@@ -7,15 +7,13 @@ class App{
     const ACCESS_DENIED = 3000;
 
     function __construct(Request $Request){
-        //$this->db = Db::getInstance()->getConnection();
         $this->db = new DB();
         $this->Request = $Request;
     }
     function processAuth(){
         $ip = $_SERVER['SERVER_ADDR'];
         $Maccess = new Maccess();
-        // view-source:http://127.0.0.1:8082/auth/i-4567/ff611907517b674006666575fbb16511c26324d2/
-        if(sha1(SECRET) == $this->Request->auth_code){  // ff611907517b674006666575fbb16511c26324d2
+        if(sha1(SECRET) == $this->Request->auth_code){
             $Maccess->delIp($ip);
 
             $dev_id = $this->Request->dev_id;
@@ -24,6 +22,8 @@ class App{
 
             $Msess = new Msess();
             $Msess->setSession($dev_id, $session_id);
+
+            $Maccess->delIp($ip);
         }else{
             $Maccess->incrementAccessCountByIp($ip);
             $access_count = $Maccess->getAccessCountByIp($ip);
@@ -116,16 +116,24 @@ class App{
         $M->setRegs($dev_id, $a_addr_vals_cach);
     }
 
-    function processLog(Request $Request){
+    function processLog(){
         $dev_id = $this->Request->dev_id;
+        $addr = $this->Request->log_addr;
 
-        $q = 'SELECT value, comment, created FROM log WHERE device_id='.$dev_id.' AND addr='.$this->Request->log_addr;
+        $q = 'SELECT addr, value, comment, created FROM log WHERE device_id='.$dev_id.' AND addr='.$addr." ORDER BY id DESC";
         $q.=' LIMIT '.$this->Request->log_limit;
-        if($this->Request->logo_ffset) $q.=' OFFSET '.$this->Request->log_offset;
+        if($this->Request->log_offset) $q.=' OFFSET '.$this->Request->log_offset;
         $res = $this->db->qry($q);
+
+        $this->a_res['addr'] = base_convert($addr, 10, 16);
+        $this->a_res['device_id'] = base_convert($dev_id, 10, 16);
+
+        $a_log = array();
         while($row = $res->fetch_assoc()){
-            $this->a_res[$row['addr']]=$row;
+            $val = base_convert($row['value'], 10, 16);
+            $a_log[$row['created']]=$val.';'.$row['comment'];
         }
+        $this->a_res['log'] = $a_log;
     }
 
 }

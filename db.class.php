@@ -1,7 +1,4 @@
 <?php
-/**
-$this->db = DB::getInstance()->getConnection();
- */
 class DB{
     public $db;
 

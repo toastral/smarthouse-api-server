@@ -17,33 +17,6 @@ include 'maddr.class.php';
 include 'mblock.class.php';
 include 'msess.class.php';
 
-/*
-$expiration = 24*60*60*7; // 7 дней
-$m = new Memcached();
-$m->addServer('localhost', 11211);
-//$m->set('foo', 100, $expiration);
-$new_foo = $m->get('foo3');
-if(!$new_foo) $new_foo=0;
-$new_foo++;
-$m->set('foo3', $new_foo, $expiration);
-var_dump($m->get('foo3'));
-$items = array(
-    11 => 22,
-    'key1' => 'value1',
-    'key2' => 'value2',
-    'key3' => 'value3',
-    'foo2'  => 200,
-    1000   =>  45321,
-    'device' => array('1233'=> '123123', 123123=> 123123, 'adq'=>12312)
-);
-$m->setMulti($items, $expiration);
-$keys = array(11, 'foo', 'key1', 'key2', 'zet', 'key3', 1000, 'device');
-$got = $m->getMulti($keys, $null, Memcached::GET_PRESERVE_ORDER);
-print_r($got);
-var_dump($m->get('foo'));
-exit;
-*/
-
 try{
 
     $Request = new Request();
