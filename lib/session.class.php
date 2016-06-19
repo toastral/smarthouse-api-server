@@ -10,7 +10,7 @@ class Session{
     function check(){
         $dev_id = $this->Request->dev_id;
 
-        $ip = $_SERVER['SERVER_ADDR'];
+        $ip = $_SERVER['REMOTE_ADDR'];
         $Maccess = new Maccess();
 
         $M = new Msess();

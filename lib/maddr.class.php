@@ -6,7 +6,6 @@ class Maddr extends Mcach{
     }
     function setRegs($dev_id, $a_addr_vals){
         $a_addr_vals_mcach = $this->get($dev_id);
-        //if(!is_array($a_addr_vals_mcach))  $a_addr_vals_mcach = array();
         foreach($a_addr_vals as $addr => $val){
             $a_addr_vals_mcach[$addr] = $val;
         }

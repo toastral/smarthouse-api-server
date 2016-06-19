@@ -11,7 +11,7 @@ class App{
         $this->Request = $Request;
     }
     function processAuth(){
-        $ip = $_SERVER['SERVER_ADDR'];
+        $ip = $_SERVER['REMOTE_ADDR'];
         $Maccess = new Maccess();
         if(sha1(SECRET) == $this->Request->auth_code){
             $Maccess->delIp($ip);

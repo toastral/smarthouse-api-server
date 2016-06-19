@@ -4,7 +4,7 @@ class Block{
     function __construct(){}
     function check(){
         $Mblock = new Mblock();
-        $ip = $_SERVER['SERVER_ADDR'];
+        $ip = $_SERVER['REMOTE_ADDR'];
         if($Mblock->isIpBlack($ip)) throw new MyException("Ip is blocked", self::IP_IS_BLOCKED);
     }
 }

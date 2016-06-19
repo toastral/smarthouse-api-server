@@ -6,7 +6,6 @@ class DB{
         $this->db = DbSingleton::getInstance()->getConnection();
     }
     function qry($q){
-var_dump($q);
         $res = $this->db->query($q);
         if(!$res){
             throw new MyException("Mysql query failure: (" . $this->db->errno . ") " . $this->db->error."\n query: ".$q);
