@@ -2,32 +2,47 @@
 class App{
     private $db;
     private $Request;
-    public  $a_res;
+    public  $a_res = array('st' => 1);
+
+    const ACCESS_DENIED = 3000;
 
     function __construct(Request $Request){
         //$this->db = Db::getInstance()->getConnection();
         $this->db = new DB();
         $this->Request = $Request;
     }
-
     function processAuth(){
-        $q="SELECT value FROM config WHERE name='SECRET'";
-        $res = $this->db->qry($q);
-        $row = $res->fetch_assoc();
-        if(sh1($row['SECRET']) == $this->Request->auth_hash){
-           // удалить ip из таблицы block
-           // удалить по device_id из таблицы session
-           // сгенерировать session_id и добавить в таблицу session
-           // $this->a_res[]=session_id
+        $ip = $_SERVER['SERVER_ADDR'];
+        $Maccess = new Maccess();
+        // view-source:http://127.0.0.1:8082/auth/i-4567/ff611907517b674006666575fbb16511c26324d2/
+        if(sha1(SECRET) == $this->Request->auth_code){  // ff611907517b674006666575fbb16511c26324d2
+            $Maccess->delIp($ip);
+
+            $dev_id = $this->Request->dev_id;
+            $session_id = Utills::generateSessionHash($dev_id);
+            $this->a_res['session_id']=$session_id;
+
+            $Msess = new Msess();
+            $Msess->setSession($dev_id, $session_id);
         }else{
-            // проверить, есть ли ip в таблице block - если есть увеличить ему счетчик
-            // сгенерировать ошибку - access denied
+            $Maccess->incrementAccessCountByIp($ip);
+            $access_count = $Maccess->getAccessCountByIp($ip);
+            if($access_count > NUM_OF_AUTH_ATTEMPS_BEFORE_BLOCK){
+                $Maccess->delIp($ip);
+                $Mblock = new Mblock();
+                $Mblock->setIp($ip);
+            }
+            throw new MyException("ACCESS DENIED", self::ACCESS_DENIED);
         }
     }
 
     function processPut(){
-        $a_addr_for_put = array_keys($this->Request->a_addr_values);
-        $q ='SELECT id, addr, value FROM current_data WHERE addr IN('.implode(',', $a_addr_for_put).') AND device_id='.$this->Request->device_id;
+
+        $dev_id         = $this->Request->dev_id;
+        $a_addr_vals    = $this->Request->a_addr_vals;
+        $a_addr         = array_keys($a_addr_vals);
+
+        $q ='SELECT id, addr, value FROM current_data WHERE addr IN('.implode(',', $a_addr).') AND device_id='.$dev_id;
         $res = $this->db->qry($q);
         $a_data_in_db = array();
         $a_addr_for_update = array();
@@ -38,15 +53,15 @@ class App{
                 $a_addr_for_update[] = $row['addr'];
             }
         }
-        $a_addr_for_insert = array_diff($a_addr_for_put, $a_addr_for_update);
 
-print_r($a_addr_for_insert);
+        $a_addr_for_insert = array_diff($a_addr, $a_addr_for_update);
+
         if(count($a_addr_for_insert)){
             $q = "INSERT INTO current_data (device_id, addr, value, created) VALUES ";
             $a_q = array();
             foreach($a_addr_for_insert as $addr){
-                $value = $this->Request->a_addr_values[$addr];
-                $a_q[] = sprintf('( %d, %d, %d, %d)', $this->Request->device_id, $addr, $value, time());
+                $value = $a_addr_vals[$addr];
+                $a_q[] = sprintf('( %d, %d, %d, %d)', $dev_id, $addr, $value, time());
             }
             $q = $q.implode(',', $a_q);
             $this->db->qry($q);
@@ -55,41 +70,58 @@ print_r($a_addr_for_insert);
         if(count($a_addr_for_update)){
             $q = " UPDATE current_data SET device_id=%d, addr=%d, value=%d, created=%d WHERE id=%d; ";
             foreach($a_addr_for_update as $addr){
-                $value = $this->Request->a_addr_values[$addr];
-                $qq = sprintf($q, $this->Request->device_id, $addr, $value, time(), $a_data_in_db[$addr]['id']);
+                $qq = sprintf($q, $dev_id, $addr, $a_addr_vals[$addr], time(), $a_data_in_db[$addr]['id']);
                 $this->db->qry($qq);
             }
         }
 
-
         // добавление в лог
         $q = "INSERT INTO log (device_id, addr, value, comment, created) VALUES ";
         $a_q = array();
-        foreach($a_addr_for_put as $addr){
-            $value = $this->Request->a_addr_values[$addr];
-            $a_q[] = sprintf("( %d, %d, %d, '%s', %d)", $this->Request->device_id, $addr, $value, $this->Request->comment, time());
+        foreach($a_addr as $addr){
+            $a_q[] = sprintf("( %d, %d, %d, '%s', %d)", $dev_id, $addr, $a_addr_vals[$addr], $this->Request->comment, time());
         }
         $q = $q.implode(',', $a_q);
         $this->db->qry($q);
 
         // "подогрев" кэша
+        $M = new Maddr();
+        $M->setRegs($dev_id, $a_addr_vals);
     }
-    function processGet(){
-        // выборка из кэша -> $a_res
-        // формируем массив адресов, которых нет в кэше
 
-        $q = 'SELECT addr, value FROM current_data WHERE addr IN('.implode(',', $this->Request->a_addr).') AND device_id='.$this->Request->device_id;
-        $res = $this->db->qry($q);
-        while($row = $res->fetch_assoc()){
-            $this->a_res[$row['addr']]=$row['value'];
+    function processGet(){
+        $dev_id = $this->Request->dev_id;
+        // выборка из кэша -> $a_res
+        $M = new Maddr();
+        // получим все регистры из кэша
+        $a_addr_vals_cach = $M->getAddr($dev_id);
+        $a_addr_cach = array_keys($a_addr_vals_cach);
+
+        // получим регистры, которых нет в кэше
+        $a_addr = array_diff($this->Request->a_addr, $a_addr_cach);
+        if(count($a_addr)){
+            $q = 'SELECT addr, value FROM current_data WHERE addr IN('.implode(',', $a_addr).') AND device_id='.$dev_id;
+            $res = $this->db->qry($q);
+            while($row = $res->fetch_assoc()){
+                $a_addr_vals_cach[$row['addr']] = $row['value'];
+            }
+        }
+        // формируем ответ
+        foreach($this->Request->a_addr as $addr){
+            if(!isset($a_addr_vals_cach[$addr])) continue;
+            $val = $a_addr_vals_cach[$addr];
+            $this->a_res[base_convert($addr, 10, 16)]=base_convert($val, 10, 16);
         }
         // "подогрев" кэша только что выбранными значениями из БД
+        $M->setRegs($dev_id, $a_addr_vals_cach);
     }
 
     function processLog(Request $Request){
-        $q = 'SELECT value, comment, created FROM log WHERE device_id='.$this->Request->device_id.' AND addr='.$this->Request->logaddr;
-        $q.=' LIMIT '.$this->Request->loglimit;
-        if($this->Request->logoffset) $q.=' OFFSET '.$this->Request->logoffset;
+        $dev_id = $this->Request->dev_id;
+
+        $q = 'SELECT value, comment, created FROM log WHERE device_id='.$dev_id.' AND addr='.$this->Request->log_addr;
+        $q.=' LIMIT '.$this->Request->log_limit;
+        if($this->Request->logo_ffset) $q.=' OFFSET '.$this->Request->log_offset;
         $res = $this->db->qry($q);
         while($row = $res->fetch_assoc()){
             $this->a_res[$row['addr']]=$row;

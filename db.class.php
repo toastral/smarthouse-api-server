@@ -1,29 +1,41 @@
 <?php
 /**
-$db = DbSingleton::getInstance()->getConnection();
+$this->db = DB::getInstance()->getConnection();
  */
-class Db{
-    private $db;
+class DB{
+    public $db;
+
+    function __construct(){
+        $this->db = DbSingleton::getInstance()->getConnection();
+    }
+    function qry($q){
+var_dump($q);
+        $res = $this->db->query($q);
+        if(!$res){
+            throw new MyException("Mysql query failure: (" . $this->db->errno . ") " . $this->db->error."\n query: ".$q);
+        }
+        return $res;
+    }
+}
+
+class DbSingleton{
+    private $_db;
     private static $_instance;
 
     public static function getInstance() {
         if(!self::$_instance) self::$_instance = new self();
         return self::$_instance;
     }
-    public function __construct($db_host, $db_user, $db_pass, $db_name) {
-        $this->db = new mysqli($db_host, $db_user, $db_pass, $db_name);
+
+    private function __construct() {
+        $this->_db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
         if(mysqli_connect_error()) {
-            throw new Exception("Mysql connect failure: (" . $this->db->errno . ") " . $this->db->error);
+            throw new MyException("Mysql connect failure: (" . $this->_db->connect_errno . ") " . $this->_db->connect_error);
         }
     }
+
     public function getConnection() {
-        return $this->db;
-    }
-    function query($q){
-        $res = $this->db->query($q);
-        if(!$res){
-            throw new Exception("Mysql query failure: (" . $this->db->errno . ") " . $this->db->error);
-        }
-        return $res;
+        return $this->_db;
     }
 }
+?>

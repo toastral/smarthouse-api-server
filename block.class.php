@@ -1,17 +1,11 @@
 <?php
 class Block{
-    private $db;
-    private $Request;
-
-    function __construct(Request $Request){
-        //$this->db = Db::getInstance()->getConnection();
-        $this->Request = $Request;
-    }
-
+    const IP_IS_BLOCKED = 4000;
+    function __construct(){}
     function check(){
-        // получить строку где ip=$_SERVER['REMOTE_ADDR'] и count>3 из таблицы block
-        // если такой записи нет, ничего не делаем
-        // если записть есть ACCESS DENIED
+        $Mblock = new Mblock();
+        $ip = $_SERVER['SERVER_ADDR'];
+        if($Mblock->isIpBlack($ip)) throw new MyException("Ip is blocked", self::IP_IS_BLOCKED);
     }
 }
 ?>
