@@ -16,6 +16,8 @@ include 'lib/maccess.class.php';
 include 'lib/maddr.class.php';
 include 'lib/mblock.class.php';
 include 'lib/msess.class.php';
+include 'lib/mcurdata.class.php';
+include 'lib/secretword.class.php';
 
 try{
 

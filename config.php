@@ -1,11 +1,12 @@
 <?php
-
 define('DB_HOST',"localhost:3306");
 define('DB_USER',"root");
 define('DB_PASS',"mysqlroot");
 define('DB_NAME',"smart");
 
-define('SECRET',"Rocket-123");
+// админка
+define('ADMIN_LOGIN',"admin");
+define('ADMIN_PASS',"admin");
 
 define('NUM_OF_AUTH_ATTEMPS_BEFORE_BLOCK', "5"); // кол-во попыток авторизации перед блокировкой ip
 
