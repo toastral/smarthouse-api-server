@@ -6,6 +6,21 @@ set_time_limit(0);
 include('head.php');
 include('../lib/pagination.class.php'); // https://github.com/onassar/PHP-Pagination
 
+// determine page (based on <_GET>)
+$page = isset($_GET['page']) ? ((int) $_GET['page']) : 1;
+
+// instantiate; set current page; set number of records
+$pagination = (new Pagination());
+$pagination->setCurrent($page);
+$pagination->setTotal(200);
+
+// grab rendered/parsed pagination markup
+$markup = $pagination->parse();
+
+echo $markup;
+
+exit;
+
 $path_to_script = __DIR__;
 $path_to_xenforo = realpath(__DIR__.'/..');
 
