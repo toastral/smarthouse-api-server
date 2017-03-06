@@ -69,7 +69,7 @@ class Pagination
      *
      * @access public
      * @param  integer $current (default: null)
-     * @param  integer $total (default: null)
+     * @param  integer $total   (default: null)
      * @return void
      */
     public function __construct($current = null, $total = null)

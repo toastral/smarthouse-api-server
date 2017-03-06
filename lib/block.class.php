@@ -1,11 +1,16 @@
 <?php
-class Block{
+class Block
+{
     const IP_IS_BLOCKED = 4000;
-    function __construct(){}
-    function check(){
+    function __construct()
+    {
+    }
+    function check()
+    {
         $Mblock = new Mblock();
         $ip = $_SERVER['REMOTE_ADDR'];
-        if($Mblock->isIpBlack($ip)) throw new MyException("Ip is blocked", self::IP_IS_BLOCKED);
+        if($Mblock->isIpBlack($ip)) { throw new MyException("Ip is blocked", self::IP_IS_BLOCKED);
+        }
     }
 }
 ?>

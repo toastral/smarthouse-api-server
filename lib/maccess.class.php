@@ -1,23 +1,30 @@
 <?php
-class Maccess extends Mcach{
+class Maccess extends Mcach
+{
     const ACCESS_ID = 'access_id';
-    function __construct(){
+    function __construct()
+    {
         parent::__construct();
         $this->expiration = MEMCACHE_TIMEOUT_ACCESS_IP;
     }
-    function incrementAccessCountByIp($ip){
+    function incrementAccessCountByIp($ip)
+    {
         $a_access = $this->get(self::ACCESS_ID);
-        if(!isset($a_access[$ip])) $a_access[$ip]=0;
+        if(!isset($a_access[$ip])) { $a_access[$ip]=0;
+        }
         $a_access[$ip]++;
         $this->set(self::ACCESS_ID, $a_access);
     }
 
-    function getAccessCountByIp($ip){
+    function getAccessCountByIp($ip)
+    {
         $a_access = $this->get(self::ACCESS_ID);
-        if(!isset($a_access[$ip])) return 0;
+        if(!isset($a_access[$ip])) { return 0;
+        }
         return $a_access[$ip];
     }
-    function delIp($ip){
+    function delIp($ip)
+    {
         $a_access = $this->get(self::ACCESS_ID);
         unset($a_access[$ip]);
         $this->set(self::ACCESS_ID, $a_access);

@@ -1,10 +1,10 @@
 <?php
-ini_set("display_errors",1);
+ini_set("display_errors", 1);
 error_reporting(E_ALL); 
 set_time_limit(0);
 //include('auth.php');
-include('head.php');
-include('../lib/pagination.class.php'); // https://github.com/onassar/PHP-Pagination
+require 'head.php';
+require '../lib/pagination.class.php'; // https://github.com/onassar/PHP-Pagination
 
 // determine page (based on <_GET>)
 $page = isset($_GET['page']) ? ((int) $_GET['page']) : 1;
@@ -26,50 +26,52 @@ $path_to_xenforo = realpath(__DIR__.'/..');
 
 $prex = $path_to_script.'/php/';
 
-include $prex.'db.class.php';
+require $prex.'db.class.php';
 $scanned_directory = array_diff(scandir($prex.'orm'), array('..', '.'));
-while($file = array_pop($scanned_directory)) include $prex.'orm/'.$file;
+while($file = array_pop($scanned_directory)) { include $prex.'orm/'.$file;
+}
 
 $scanned_directory = array_diff(scandir($prex.'lib'), array('..', '.'));
-while($file = array_pop($scanned_directory)) include $prex.'lib/'.$file;
+while($file = array_pop($scanned_directory)) { include $prex.'lib/'.$file;
+}
 
 ?>
 <script>
 jQuery(function($){
-	$('#button_load_messages').on('click', function(){
-		load_messages();
-		return true;
-	});
-	
-	$('#file_load_1').on('click', function(){
-		$('#formloadblock').show();
-		$('#serverloadblock').hide();
-		return true;
-	});
-	
-	$('#file_load_2').on('click', function(){
-		$('#formloadblock').hide();
-		$('#serverloadblock').show();
-		return true;
-	});
-	
+    $('#button_load_messages').on('click', function(){
+        load_messages();
+        return true;
+    });
+    
+    $('#file_load_1').on('click', function(){
+        $('#formloadblock').show();
+        $('#serverloadblock').hide();
+        return true;
+    });
+    
+    $('#file_load_2').on('click', function(){
+        $('#formloadblock').hide();
+        $('#serverloadblock').show();
+        return true;
+    });
+    
 });
 
 
 jQuery(function($){
-	$('#button_load_users').on('click', function(){
-		load_users();           
-		return true;
-	});
+    $('#button_load_users').on('click', function(){
+        load_users();           
+        return true;
+    });
 });
 
 
 function load_messages(){
-	// some checks may be here
+    // some checks may be here
 }
 
 function load_users(){
-	// some checks may be here
+    // some checks may be here
 }
 
 </script>  
@@ -81,7 +83,7 @@ function load_users(){
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Импорт сообщений</a></li>
     <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Импорт пользователей</a></li>
-	<li role="presentation"><a href="#help" aria-controls="help" role="tab" data-toggle="tab">Помощь</a></li>
+    <li role="presentation"><a href="#help" aria-controls="help" role="tab" data-toggle="tab">Помощь</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -92,11 +94,11 @@ function load_users(){
     <label for="selectNodeId">Форумы</label>
 <?php $Forum = new Forum();
 $a_list = $Forum->getNodeIdAndTitle(); 
-?>	
-    <select name="node_id" id="selectNodeId" class="form-control">	
-<?php foreach($a_list as $row):?>	
-        <option value="<?=$row['node_id']?>"><?=$row['title']?></option>
-<?php endforeach;?>			
+?>    
+    <select name="node_id" id="selectNodeId" class="form-control">    
+<?php foreach($a_list as $row):?>    
+        <option value="<?php echo $row['node_id']?>"><?php echo $row['title']?></option>
+<?php endforeach;?>            
     </select>
   </div>
   
@@ -109,7 +111,7 @@ $a_list = $Forum->getNodeIdAndTitle();
 <div class="radio">
   <label>
     <input type="radio" name="radio_type_file_load" id="file_load_2" value="server">
-	Взять файл с сервера<small> - Используйте для файлов большого объема (свыше 2 Мб)</small>
+    Взять файл с сервера<small> - Используйте для файлов большого объема (свыше 2 Мб)</small>
   </label>
 </div>	
   
@@ -170,15 +172,15 @@ $a_list = $Forum->getNodeIdAndTitle();
   <input type="submit" class="btn btn-default" id="button_load_users">
 </form>
     </div>
-	<div role="tabpanel" class="tab-pane" id="help">
-		<div>
-		<br>
-		Установите права 777 на папки messages и upload.<br>
+    <div role="tabpanel" class="tab-pane" id="help">
+        <div>
+        <br>
+        Установите права 777 на папки messages и upload.<br>
         А также на файл закачиваемый в messages.
-		</div>
-	</div>	
-	
-	
+        </div>
+    </div>    
+    
+    
   </div>
 </div>
 </section>

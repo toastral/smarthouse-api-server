@@ -2,22 +2,22 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
-include 'config.php';
-include 'lib/utills.class.php';
-include 'lib/myexception.class.php';
-include 'lib/db.class.php';
-include 'lib/request.class.php';
-include 'lib/app.class.php';
-include 'lib/session.class.php';
-include 'lib/block.class.php';
-include 'lib/answer.class.php';
-include 'lib/mcach.class.php';
-include 'lib/maccess.class.php';
-include 'lib/maddr.class.php';
-include 'lib/mblock.class.php';
-include 'lib/msess.class.php';
-include 'lib/mcurdata.class.php';
-include 'lib/secretword.class.php';
+require 'config.php';
+require 'lib/utills.class.php';
+require 'lib/myexception.class.php';
+require 'lib/db.class.php';
+require 'lib/request.class.php';
+require 'lib/app.class.php';
+require 'lib/session.class.php';
+require 'lib/block.class.php';
+require 'lib/answer.class.php';
+require 'lib/mcach.class.php';
+require 'lib/maccess.class.php';
+require 'lib/maddr.class.php';
+require 'lib/mblock.class.php';
+require 'lib/msess.class.php';
+require 'lib/mcurdata.class.php';
+require 'lib/secretword.class.php';
 //добавим в базу 2 device_id
 
 $dev_id_a_hex = '0F1B';
@@ -87,7 +87,7 @@ echo "$url_get\n";
 $response = file_get_contents($url_get);
 var_dump($response);
 $o_response = json_decode($response);
-if(!isset($o_response->st)){
+if(!isset($o_response->st)) {
     echo "#1 Test fail - not found o_response->st\n";
     var_dump($o_response);
 }else{
@@ -100,7 +100,7 @@ echo "$url_put\n";
 $response = file_get_contents($url_put);
 var_dump($response);
 $o_response = json_decode($response);
-if(!isset($o_response->st)){
+if(!isset($o_response->st)) {
     echo "#2 Test fail - not found o_response->st\n";
     var_dump($o_response);
 }else{
@@ -113,7 +113,7 @@ $response = file_get_contents($url_get);
 var_dump($response);
 $o_response = json_decode($response);
 
-if(!isset($o_response->st)){
+if(!isset($o_response->st)) {
     echo "#3 Test fail - not found o_response->st\n";
     var_dump($o_response);
 }else{
@@ -121,20 +121,24 @@ if(!isset($o_response->st)){
     var_dump($o_response);
 }
 
-if(!isset($o_response->aaaa)){
+if(!isset($o_response->aaaa)) {
     echo "#4 Test fail - not found o_response->aaaa\n";
-}else echo "#4 Test ok\n";
-if(!isset($o_response->aaaa[1])){
+}else { echo "#4 Test ok\n";
+}
+if(!isset($o_response->aaaa[1])) {
     echo "#5 Test fail - not found o_response->aaaa[1]\n";
-}else echo "#5 Test ok\n";
+}else { echo "#5 Test ok\n";
+}
 
-if(strtoupper($o_response->aaaa[0]) != $reg_a_val_hex){
+if(strtoupper($o_response->aaaa[0]) != $reg_a_val_hex) {
     echo "#6 Test fail - not equal o_response->aaaa[1] and $reg_a_val_hex\n";
-}else echo "#6 Test ok\n";
+}else { echo "#6 Test ok\n";
+}
 
-if($o_response->aaaa[1] != $comment_a){
+if($o_response->aaaa[1] != $comment_a) {
     echo "#7 Test fail - not equal o_response->aaaa[1] and $comment_a\n";
-}else echo "#7 Test ok\n";
+}else { echo "#7 Test ok\n";
+}
 
 
 ///////////////// попробуем записать в чужое устройство
@@ -144,7 +148,7 @@ echo "$url_put\n";
 $response = file_get_contents($url_put);
 var_dump($response);
 $o_response = json_decode($response);
-if(!isset($o_response->error)){
+if(!isset($o_response->error)) {
     echo "#8 Test fail - not found o_response->error\n";
     var_dump($o_response);
 }else{
@@ -167,8 +171,10 @@ $db->query('DELETE * FROM log WHERE device_id='.$dev_id_b_dec);
 
 
 
-class Loader{
-    function download($url, $ref){
+class Loader
+{
+    function download($url, $ref)
+    {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_VERBOSE, 0);
